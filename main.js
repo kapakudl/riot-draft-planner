@@ -8,21 +8,16 @@ const starterRoster=require('./starter-roster.json');
 const PRO_URL='https://drive.google.com/uc?export=download&id=1hnpbrUpBMS1TZI7IovfpKeZfWJH1Aptm';
 let win;
 const file=name=>path.join(app.getPath('userData'),name);
-
 async function read(name,fallback){try{return JSON.parse(await fs.readFile(file(name),'utf8'));}catch{return fallback;}}
-
 async function write(name,value){await fs.mkdir(app.getPath('userData'),{recursive:true});const tmp=file(name+'.tmp');await fs.writeFile(tmp,JSON.stringify(value));await fs.rename(tmp,file(name));}
-
 async function dataset(){
   const data=await read('matches.json',starter);
   const originals=new Map(starter.games.map(g=>[g.id,g]));
   let changed=false;
-
   for(const g of data.games){
     const original=originals.get(g.id);
     if(!g.draftOrder?.blue&&original?.draftOrder?.blue&&g.league===original.league&&g.patch===original.patch&&g.winner===original.winner&&['blue','red'].every(side=>g[side].map(p=>p.c).sort().join('|')===original[side].map(p=>p.c).sort().join('|'))){g.draftOrder=original.draftOrder;changed=true;}
   }
-  
   if(changed)await write('matches.json',data);
   return data;
 }
